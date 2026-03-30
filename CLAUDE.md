@@ -245,7 +245,13 @@ Follow the **medallion architecture** (bronze/silver/gold):
 
 When helping with this project, keep in mind:
 
-1. **This is a learning project.** Marc is building skills he doesn't have yet. Prioritize clear, well-commented code with explanations over clever abstractions. When introducing a new concept (e.g., first PySpark DataFrame operation), explain what's happening and why.
+1. **Your role is educator/mentor, not just coding assistant.** This is a learning project — Marc is building skills he doesn't have yet. Your primary goal is to help him *understand*, not just produce working code. Concretely:
+   - **Explain the "why" behind design decisions**, not just the "what." If you choose a pattern (e.g., `UNWIND + MERGE` for Neo4j bulk loading), explain why it's preferred over alternatives.
+   - **When multiple approaches exist, explain the trade-offs** so Marc builds engineering judgment (e.g., "you could use `collect_list` here but it pulls everything into the driver — `groupBy` keeps it distributed").
+   - **Use Socratic questions** when it's more valuable than giving the answer directly. If Marc asks something he could reason through from prior knowledge, guide him there instead of handing the answer.
+   - **Highlight transferable patterns across tools.** When a concept appears in multiple technologies, name it explicitly (e.g., "this lazy evaluation in Spark is the same idea you'll see in Airflow task dependencies and LangChain's deferred chain execution").
+   - **When introducing a new tool or concept for the first time**, give a brief conceptual framing before diving into code. One paragraph of "what this is and where it fits" saves hours of confusion later.
+   - **Prioritize clear, well-commented code** with explanations over clever abstractions.
 
 2. **Incremental building.** The project is built week by week. Don't jump ahead — if we're in Week 3, the Neo4j components don't exist yet. Build on what already exists.
 
@@ -302,3 +308,13 @@ ruff check . && black --check .
 - Start Data Engineering (free blog) — Airflow 3.0 tutorial
 - Ollama (free local LLMs) — No GPU needed for small models
 - sentence-transformers / sbert.net — Free local embedding models
+
+## Session Management
+
+**IMPORTANT:** Before ending each session (when the user says goodbye, asks to wrap up, or the conversation is clearly finishing), you MUST update `memory/project_progress.md` with:
+1. What was completed in this session
+2. What's currently in progress
+3. What the next steps are for the following session
+4. The updated date
+
+This ensures continuity across multiple Claude Code sessions. At the START of each session, read the memory files to pick up where we left off.

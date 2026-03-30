@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "eugraphrag"
+version = "0.1.0"
+description = "GraphRAG pipeline for EU legislation: from raw EUR-Lex data to a hybrid Knowledge Graph + Vector Search chatbot"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "Marc Ramon Moreno"}]
+
+dependencies = [
+    # Week 1: SQL + Data Modeling
+    "psycopg2-binary>=2.9",
+    "sqlalchemy>=2.0",
+    # Notebooks
+    "jupyter>=1.0",
+    "ipykernel>=6.0",
+    # Code quality
+    "ruff>=0.4",
+    "black>=24.0",
+    # Testing
+    "pytest>=8.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
