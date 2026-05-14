@@ -17,5 +17,32 @@ services:
       timeout: 5s
       retries: 5
 
+  # Jupyter + PySpark (Week 2+). Imagen oficial mantenida por el equipo Jupyter.
+  # Incluye Python 3.11, PySpark, Java 17, pandas, numpy, matplotlib, jupyterlab.
+  spark:
+    image: quay.io/jupyter/pyspark-notebook:latest
+    container_name: eugraphrag-spark
+    ports:
+      - "8888:8888"   # JupyterLab
+      - "4040:4040"   # Spark UI (visible mientras hay un Job ejecutándose)
+    environment:
+      JUPYTER_TOKEN: eugraphrag  # token fijo solo para desarrollo local
+      # Permite que Spark se conecte a Postgres por nombre de servicio dentro de la red de Docker
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: eurlex
+      POSTGRES_USER: eugraphrag
+      POSTGRES_PASSWORD: eugraphrag
+      # PySpark vive en SPARK_HOME, no como paquete pip. Exponerlo en PYTHONPATH
+      # hace que `import pyspark` funcione tanto en kernels de Jupyter como en
+      # cualquier `python` ejecutado dentro del contenedor.
+      PYTHONPATH: /usr/local/spark/python:/usr/local/spark/python/lib/py4j-0.10.9.9-src.zip
+    volumes:
+      - ./notebooks:/home/jovyan/work/notebooks
+      - ./data:/home/jovyan/work/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres_data:
