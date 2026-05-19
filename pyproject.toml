@@ -14,6 +14,16 @@ dependencies = [
     # Week 1: SQL + Data Modeling
     "psycopg2-binary>=2.9",
     "sqlalchemy>=2.0",
+    # Week 3: PySpark pipeline + HuggingFace ingestion
+    # pyspark ya viene en la imagen del contenedor; lo listamos aqui para que
+    # IDEs (Pylance) e instalaciones locales (tests fuera del contenedor)
+    # encuentren los stubs y la API.
+    "pyspark>=4.0,<5.0",
+    # datasets<3 obligatorio: a partir de datasets==3.0 se eliminó el soporte
+    # para "dataset loading scripts". Casi todos los datasets EU buenos en HF
+    # (NLP-AUEB/eurlex, coastalcph/multi_eurlex) usan scripts -> upper bound.
+    "datasets>=2.18,<3",
+    "pyarrow>=15.0",
     # Notebooks
     "jupyter>=1.0",
     "ipykernel>=6.0",
@@ -38,3 +48,6 @@ target-version = ["py311"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "integration: requires network access (e.g. HuggingFace download). Skip by default with `-m 'not integration'`.",
+]

@@ -212,3 +212,6 @@ data/bronze/*
 data/silver/*
 data/gold/*
 !data/**/.gitkeep
+
+# Claude Code local state (per-developer permissions, not project config).
+.claude/

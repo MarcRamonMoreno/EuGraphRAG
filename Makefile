@@ -1,4 +1,4 @@
-.PHONY: up down ps logs db jupyter spark-logs install lint test
+.PHONY: up down ps logs db jupyter spark-logs install lint test test-container test-integration ingest-bronze
 
 # Docker
 up:
@@ -34,4 +34,16 @@ lint:
 	ruff check . && black --check .
 
 test:
-	pytest tests/ -v
+	pytest tests/ -v -m "not integration"
+
+# Tests dentro del contenedor (donde vive PySpark). Excluye integration por defecto.
+test-container:
+	docker exec eugraphrag-spark sh -c 'cd /home/jovyan/work && python -m pytest tests/ -v -m "not integration"'
+
+# Incluye los tests de integracion (hacen descarga real desde HuggingFace).
+test-integration:
+	docker exec eugraphrag-spark sh -c 'cd /home/jovyan/work && python -m pytest tests/ -v'
+
+# Ingestion bronze: descarga NLP-AUEB/eurlex split=train (subset 500) -> data/bronze/eurlex/
+ingest-bronze:
+	docker exec eugraphrag-spark sh -c 'cd /home/jovyan/work && python -m spark.ingestion --split train --subset-size 500 --output data/bronze/eurlex'

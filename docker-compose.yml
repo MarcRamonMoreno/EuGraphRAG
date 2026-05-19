@@ -40,6 +40,14 @@ services:
     volumes:
       - ./notebooks:/home/jovyan/work/notebooks
       - ./data:/home/jovyan/work/data
+      # Mounts añadidos en Week 3: los módulos Python del proyecto necesitan ser
+      # visibles dentro del contenedor para hacer `python -m spark.ingestion` y
+      # para que pytest encuentre los tests. Mount explícito (no `./:/work`)
+      # para evitar exponer .git, .venv y .vscode al contenedor (lento en Windows
+      # por el bind mount via WSL2).
+      - ./spark:/home/jovyan/work/spark
+      - ./tests:/home/jovyan/work/tests
+      - ./pyproject.toml:/home/jovyan/work/pyproject.toml
     depends_on:
       postgres:
         condition: service_healthy
