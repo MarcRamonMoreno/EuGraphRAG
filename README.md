@@ -212,7 +212,7 @@ A few non-obvious decisions made along the way, kept here so future-me (and revi
 Currently Process & Project Engineer at IPB-Chemgineering Spain. Previously Bioprocess & Control Engineer at the ESA MELiSSA Pilot Plant (full-stack data platform), Junior OpenMP Developer at the Barcelona Supercomputing Center (LLVM/Clang, C++23, CUDA on RISC-V).
 
 📚 Postgrad AI w/ Deep Learning (UPC ETSETB) · MSc Modelling for Science and Engineering (UAB) · BSc Biosystems Engineering (UPC)
-🔗 [GitHub](https://github.com/MarcRamonMoreno) · marc.ramon6@gmail.com
+🔗 [GitHub](https://github.com/MarcRamonMoreno) · marc.ramon12@outlook.com
 
 ---
 
