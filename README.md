@@ -31,9 +31,9 @@ flowchart TD
     classDef done fill:#1b5e20,stroke:#2e7d32,color:#fff;
     classDef wip  fill:#bf360c,stroke:#d84315,color:#fff;
     classDef todo fill:#37474f,stroke:#455a64,color:#cfd8dc;
-    class A,B done;
-    class C wip;
-    class D,E,F,G,H,I,J,K todo;
+    class A,B,C done;
+    class D wip;
+    class E,F,G,H,I,J,K todo;
 ```
 
 Green = done · Orange = in progress · Grey = upcoming
@@ -46,7 +46,7 @@ Green = done · Orange = in progress · Grey = upcoming
 |:----:|:-----:|-------|:------:|
 | 1 | DE foundations | Advanced SQL + star schema modelling (Postgres) | ✅ done |
 | 2 | DE foundations | PySpark fundamentals (DataFrames, lazy eval, windows, joins) | ✅ done |
-| 3 | DE foundations | PySpark pipeline: HF → Bronze → Silver (Parquet, medallion) | 🟧 bronze done; silver pending |
+| 3 | DE foundations | PySpark pipeline: HF → Bronze → Silver (Parquet, medallion) | 🟧 bronze + silver done; gold pending |
 | 4 | DE foundations | Apache Airflow: DAGs orchestrating the PySpark pipeline | ⬜ |
 | 5 | Knowledge Graphs | Neo4j + Cypher fundamentals | ⬜ |
 | 6 | Knowledge Graphs | EUGraphRAG ontology + bulk load into Neo4j | ⬜ |
@@ -90,10 +90,11 @@ make db                                          # opens psql in the eurlex DB
 # 9 blocks + 4 exercises covering DataFrames, lazy eval, joins, windows, partitions
 ```
 
-**Week 3 — Bronze ingestion** (HuggingFace → Parquet):
+**Week 3 — Bronze + Silver pipeline** (HuggingFace → Parquet, medallion):
 ```bash
-make ingest-bronze                               # 500 docs from NLP-AUEB/eurlex
-ls data/bronze/eurlex/                           # part-*.snappy.parquet files
+make ingest-bronze                               # 500 docs from NLP-AUEB/eurlex → data/bronze/
+make transform-silver                            # parse CELEX + clean text + partition → data/silver/
+ls data/silver/eurlex/                           # year=YYYY/doc_type=X/ Hive-style partitions
 ```
 
 Or invoke the CLI directly with custom parameters:
@@ -107,7 +108,7 @@ docker exec eugraphrag-spark sh -c \
 ### Tests
 
 ```bash
-make test-container          # 4 unit tests, no network (Spark startup ~10s)
+make test-container          # 22 unit tests, no network (Spark startup ~10s)
 make test-integration        # adds 1 smoke test (downloads from HF)
 ```
 
@@ -142,26 +143,29 @@ eugraphrag/
 ├── CLAUDE.md                 # Project context, ontology, learning plan
 ├── README.md                 # This file
 ├── docker-compose.yml        # postgres + spark/jupyter
-├── Makefile                  # up/down, ingest-bronze, test-*, jupyter
+├── Makefile                  # up/down, ingest-bronze, transform-silver, test-*, jupyter
 ├── pyproject.toml            # Pinned deps (e.g. datasets<3 for legacy scripts)
 │
 ├── sql/init/                 # Postgres init: star schema + seed data (W1)
 ├── notebooks/
 │   ├── 01_sql_exercises.ipynb        # ✅ window fns, CTEs, bridge fan-out
 │   ├── 02_pyspark_intro.ipynb        # ✅ DataFrames, lazy eval, joins, windows
-│   └── 03_pyspark_pipeline.ipynb     # ✅ HF dataset exploration
+│   └── 03_pyspark_pipeline.ipynb     # ✅ HF → Bronze + Silver, shuffle (Exchange) demo
 │
 ├── spark/                    # PySpark pipeline modules (extracted from notebooks)
-│   ├── schemas.py            # ✅ EURLEX_BRONZE_SCHEMA (single source of truth)
-│   └── ingestion.py          # ✅ HF → Bronze Parquet, CLI entry point
+│   ├── schemas.py            # ✅ BRONZE + SILVER schemas + CELEX domain dicts
+│   ├── ingestion.py          # ✅ HF → Bronze Parquet, CLI entry point
+│   ├── transformations.py    # ✅ Bronze → Silver: CELEX parse, clean, partition
+│   └── quality_checks.py     # ✅ Silver data-quality gates (null/length/year)
 │
 ├── tests/
-│   ├── conftest.py           # ✅ Session-scoped SparkSession fixture
-│   └── test_ingestion.py     # ✅ 4 unit tests + 1 @pytest.mark.integration
+│   ├── conftest.py               # ✅ Session-scoped SparkSession fixture
+│   ├── test_ingestion.py         # ✅ 4 unit tests + 1 @pytest.mark.integration
+│   └── test_transformations.py   # ✅ 18 tests: CELEX parsing, cleaning, quality, e2e
 │
 └── data/
     ├── bronze/               # Raw Parquet from HuggingFace (gitignored)
-    ├── silver/               # Cleaned, partitioned (gitignored, W3 pending)
+    ├── silver/               # Cleaned, partitioned by year/doc_type (gitignored)
     └── gold/                 # Entities & relationships (gitignored, W6)
 ```
 
