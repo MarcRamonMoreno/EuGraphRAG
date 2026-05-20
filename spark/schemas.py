@@ -120,3 +120,46 @@ NO viven dentro de los ficheros Parquet sino en la ruta (Hive-style). Spark las
 reanade al leer, pero las situa al final y reinfiere su tipo. Por eso los tests
 de round-trip comparan por nombre de campo, no por orden posicional.
 """
+
+
+# ---------------------------------------------------------------------------
+# Schemas gold (modelo de grafo: tablas de nodos y de aristas para Neo4j)
+# ---------------------------------------------------------------------------
+# Gold no es "datos limpios" como silver, sino silver REPROYECTADO a la forma
+# que Neo4j carga en bulk (UNWIND + MERGE): una tabla plana por tipo de nodo y
+# una tabla plana por tipo de arista. Cada fila = un nodo o una relacion.
+
+EURLEX_GOLD_DOCUMENTS_SCHEMA: StructType = StructType(
+    [
+        StructField("celex_id", StringType(), nullable=False),
+        StructField("title", StringType(), nullable=True),
+        StructField("year", IntegerType(), nullable=False),
+        StructField("doc_type", StringType(), nullable=False),
+        StructField("doc_type_label", StringType(), nullable=False),
+        StructField("text", StringType(), nullable=False),
+    ]
+)
+"""Tabla de nodos Document. ``celex_id`` es la clave del nodo (unica -> MERGE).
+
+Incluimos ``text`` porque gold alimenta tanto Neo4j (Document.full_text) como
+ChromaDB (fuente de embeddings en la fase 3). Si la carga a Neo4j se volviera
+pesada, se podria escindir el texto a una tabla aparte; por ahora gold es el
+registro canonico autocontenido del documento."""
+
+EURLEX_GOLD_TOPICS_SCHEMA: StructType = StructType(
+    [
+        StructField("eurovoc_code", StringType(), nullable=False),
+    ]
+)
+"""Tabla de nodos Topic: codigos EuroVoc distintos. ``eurovoc_code`` es la clave.
+
+Los codigos son strings opacos publicados por la EU; no tenemos sus etiquetas
+legibles aqui (vendrian del tesauro EuroVoc, pendiente para mas adelante)."""
+
+EURLEX_GOLD_BELONGS_TO_SCHEMA: StructType = StructType(
+    [
+        StructField("celex_id", StringType(), nullable=False),
+        StructField("eurovoc_code", StringType(), nullable=False),
+    ]
+)
+"""Tabla de aristas (:Document)-[:BELONGS_TO]->(:Topic). Una fila por par."""

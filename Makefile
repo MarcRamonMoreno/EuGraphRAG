@@ -1,4 +1,4 @@
-.PHONY: up down ps logs db jupyter spark-logs install lint test test-container test-integration ingest-bronze transform-silver
+.PHONY: up down ps logs db jupyter spark-logs install lint test test-container test-integration ingest-bronze transform-silver transform-gold
 
 # Docker
 up:
@@ -51,3 +51,7 @@ ingest-bronze:
 # Transform silver: bronze -> silver (parseo CELEX + limpieza + particionado year/doc_type)
 transform-silver:
 	docker exec eugraphrag-spark sh -c 'cd /home/jovyan/work && python -m spark.transformations --input data/bronze/eurlex --output data/silver/eurlex'
+
+# Transform gold: silver -> gold (tablas de nodos/aristas para Neo4j: documents/topics/belongs_to)
+transform-gold:
+	docker exec eugraphrag-spark sh -c 'cd /home/jovyan/work && python -m spark.gold --input data/silver/eurlex --output data/gold/eurlex'
