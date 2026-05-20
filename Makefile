@@ -1,4 +1,4 @@
-.PHONY: up down ps logs db jupyter spark-logs install lint test test-container test-integration ingest-bronze
+.PHONY: up down ps logs db jupyter spark-logs install lint test test-container test-integration ingest-bronze transform-silver
 
 # Docker
 up:
@@ -47,3 +47,7 @@ test-integration:
 # Ingestion bronze: descarga NLP-AUEB/eurlex split=train (subset 500) -> data/bronze/eurlex/
 ingest-bronze:
 	docker exec eugraphrag-spark sh -c 'cd /home/jovyan/work && python -m spark.ingestion --split train --subset-size 500 --output data/bronze/eurlex'
+
+# Transform silver: bronze -> silver (parseo CELEX + limpieza + particionado year/doc_type)
+transform-silver:
+	docker exec eugraphrag-spark sh -c 'cd /home/jovyan/work && python -m spark.transformations --input data/bronze/eurlex --output data/silver/eurlex'
